@@ -15,7 +15,6 @@ Flask
 uvloop
 psutil
 langdetect
-MukeshAPI
 speedtest-cli
 aiohttp
 gitpython
