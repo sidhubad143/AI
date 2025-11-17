@@ -1,14 +1,31 @@
 # ============================
-# EVENT LOOP FIX (REQUIRED)
+# EVENT LOOP + UVLOOP FIX
 # ============================
 import asyncio
+import uvloop
 
-# Ensure event loop exists before Pyrogram initializes
+# Ensure an event loop exists BEFORE installing uvloop
 try:
     asyncio.get_event_loop()
 except RuntimeError:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
+# Install uvloop
+uvloop.install()
+
+# Monkeypatch uvloop get_event_loop to always return a loop
+_original_get_event_loop = uvloop.loop.LoopPolicy.get_event_loop
+
+def safe_get_event_loop(self):
+    try:
+        return _original_get_event_loop(self)
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+uvloop.loop.LoopPolicy.get_event_loop = safe_get_event_loop
 
 # ============================
 # NORMAL IMPORTS
@@ -23,10 +40,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import Client
 from pyrogram.enums import ParseMode
 import config
-import uvloop
-
-# Install uvloop AFTER event loop patch
-uvloop.install()
 
 # ============================
 # LOGGING CONFIG
@@ -82,6 +95,5 @@ class shizuchat(Client):
     async def stop(self):
         await super().stop()
 
-
-# Instantiate AFTER event loop is created
+# Instantiate the bot AFTER loop fix
 shizuchat = shizuchat()
