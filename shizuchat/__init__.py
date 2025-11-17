@@ -1,3 +1,18 @@
+# ============================
+# EVENT LOOP FIX (REQUIRED)
+# ============================
+import asyncio
+
+# Ensure event loop exists before Pyrogram initializes
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+# ============================
+# NORMAL IMPORTS
+# ============================
 import logging
 import time
 import pytz
@@ -10,8 +25,12 @@ from pyrogram.enums import ParseMode
 import config
 import uvloop
 
+# Install uvloop AFTER event loop patch
 uvloop.install()
 
+# ============================
+# LOGGING CONFIG
+# ============================
 logging.basicConfig(
     format="[%(asctime)s - %(levelname)s] - %(name)s - %(message)s",
     datefmt="%d-%b-%y %H:%M:%S",
@@ -21,16 +40,26 @@ logging.basicConfig(
 
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 LOGGER = logging.getLogger(__name__)
+
 boot = time.time()
+
+# ============================
+# DATABASE
+# ============================
 mongodb = MongoCli(config.MONGO_URL)
 db = mongodb.Anonymous
 mongo = MongoClient(config.MONGO_URL)
 OWNER = config.OWNER_ID
 
-#time zone
+# ============================
+# TIMEZONE & SCHEDULER
+# ============================
 TIME_ZONE = pytz.timezone(config.TIME_ZONE)
 scheduler = AsyncIOScheduler(timezone=TIME_ZONE)
 
+# ============================
+# BOT CLASS
+# ============================
 class shizuchat(Client):
     def __init__(self):
         super().__init__(
@@ -54,5 +83,5 @@ class shizuchat(Client):
         await super().stop()
 
 
+# Instantiate AFTER event loop is created
 shizuchat = shizuchat()
-    
