@@ -19,6 +19,5 @@ MukeshAPI
 speedtest-cli
 aiohttp
 gitpython
-git+https://github.com/badmunda98/BadAPI@main
-git+https://github.com/badmunda98/Pyroi@Bad
-git+https://github.com/badmunda98/PyroB@dev
+kurigram>=2.2.13
+git+https://gitlab.com/badmunda98/BadAPI
